@@ -1,0 +1,3 @@
+# Standard Python library (Tkinter, heapq, math) is used.
+# External packages are not required.
+# Python >= 3.9
