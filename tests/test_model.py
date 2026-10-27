@@ -1,7 +1,7 @@
 """Unit tests for Starfield mathematical model and 3D projection."""
 
 import unittest
-from src.models.star import Star
+from src.models.star import Star, STAR_COLORS
 from src.models.starfield_model import StarfieldModel
 
 
@@ -19,6 +19,7 @@ class TestStarModel(unittest.TestCase):
         self.assertEqual(self.star.z, 200.0)
         self.assertEqual(self.star.prev_z, 200.0)
         self.assertGreater(self.star.base_radius, 0.0)
+        self.assertIn(self.star.color, STAR_COLORS)
 
     def test_projection_math(self) -> None:
         """Verify perspective projection coordinates matches optical formula."""
@@ -55,6 +56,7 @@ class TestStarModel(unittest.TestCase):
         self.star.respawn(spread_x=500.0, spread_y=400.0)
         self.assertEqual(self.star.z, self.star.max_z)
         self.assertEqual(self.star.prev_z, self.star.max_z)
+        self.assertIn(self.star.color, STAR_COLORS)
 
 
 class TestStarfieldModel(unittest.TestCase):
@@ -91,11 +93,30 @@ class TestStarfieldModel(unittest.TestCase):
         self.model.set_speed(100.0)
         self.assertEqual(self.model.speed, 60.0)
 
+    def test_steering_computation(self) -> None:
+        """Verify mouse steering calculates normalized offsets correctly."""
+        # When mouse is at screen center, target offset should be zero
+        self.model.update_steering(mouse_x=500.0, mouse_y=350.0, width=1000.0, height=700.0)
+        self.assertAlmostEqual(self.model.target_offset_x, 0.0)
+        self.assertAlmostEqual(self.model.target_offset_y, 0.0)
+
+        # When mouse moves to right, camera steers left
+        self.model.update_steering(mouse_x=1000.0, mouse_y=350.0, width=1000.0, height=700.0)
+        self.assertLess(self.model.target_offset_x, 0.0)
+
+    def test_reset_clears_steering(self) -> None:
+        """Verify reset restores vanishing point and offsets."""
+        self.model.offset_x = 45.0
+        self.model.offset_y = -30.0
+        self.model.reset()
+        self.assertEqual(self.model.offset_x, 0.0)
+        self.assertEqual(self.model.offset_y, 0.0)
+        self.assertEqual(self.model.target_offset_x, 0.0)
+        self.assertEqual(self.model.target_offset_y, 0.0)
+
     def test_update_cycle_advances_positions(self) -> None:
         """Verify update step advances z coordinates when not paused."""
-        initial_z_sum = sum(s.z for s in self.model.stars)
         self.model.update(width=800.0, height=600.0)
-        # Coordinates should have updated
         render_data = self.model.get_render_data(800.0, 600.0)
         self.assertEqual(len(render_data), len(self.model.stars))
 
