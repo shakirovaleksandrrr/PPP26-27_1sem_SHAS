@@ -1,0 +1,3 @@
+# Standard Python library (Tkinter) is used.
+# External packages are not required for execution.
+# Python >= 3.9
