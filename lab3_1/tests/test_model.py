@@ -1,6 +1,12 @@
 """Unit tests for Starfield mathematical model and 3D projection."""
 
+import sys
+from pathlib import Path
 import unittest
+
+# Ensure lab directory is in sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from src.models.star import Star, STAR_COLORS
 from src.models.starfield_model import StarfieldModel
 
@@ -26,8 +32,6 @@ class TestStarModel(unittest.TestCase):
         center_x = 500.0
         center_y = 350.0
         fov = 400.0
-        # Expected screen_x = (x / z) * fov + center_x = (100 / 200) * 400 + 500 = 700.0
-        # Expected screen_y = (y / z) * fov + center_y = (50 / 200) * 400 + 350 = 450.0
         sx, sy, radius, px, py = self.star.get_projection(center_x, center_y, fov)
 
         self.assertAlmostEqual(sx, 700.0)
@@ -95,12 +99,10 @@ class TestStarfieldModel(unittest.TestCase):
 
     def test_steering_computation(self) -> None:
         """Verify mouse steering calculates normalized offsets correctly."""
-        # When mouse is at screen center, target offset should be zero
         self.model.update_steering(mouse_x=500.0, mouse_y=350.0, width=1000.0, height=700.0)
         self.assertAlmostEqual(self.model.target_offset_x, 0.0)
         self.assertAlmostEqual(self.model.target_offset_y, 0.0)
 
-        # When mouse moves to right, camera steers left
         self.model.update_steering(mouse_x=1000.0, mouse_y=350.0, width=1000.0, height=700.0)
         self.assertLess(self.model.target_offset_x, 0.0)
 
