@@ -1,10 +1,10 @@
-"""Unit tests for Starfield mathematical model and 3D projection."""
+"""Модульные тесты для математической модели звездного поля и 3D-проекции."""
 
 import sys
 from pathlib import Path
 import unittest
 
-# Ensure lab directory is in sys.path
+# Добавление каталога лабораторной работы в sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.models.star import Star, STAR_COLORS
@@ -12,14 +12,14 @@ from src.models.starfield_model import StarfieldModel
 
 
 class TestStarModel(unittest.TestCase):
-    """Test cases for Star entity and 3D-to-2D projection formulas."""
+    """Набор тестов для сущности Star и формул перспективного проецирования 3D в 2D."""
 
     def setUp(self) -> None:
-        """Create standard test star instance."""
+        """Создание стандартного тестового экземпляра звезды."""
         self.star = Star(x=100.0, y=50.0, z=200.0, max_z=1000.0)
 
     def test_star_initialization(self) -> None:
-        """Verify initial coordinates and depth constraints."""
+        """Проверка начальных координат и ограничений глубины звезды."""
         self.assertEqual(self.star.x, 100.0)
         self.assertEqual(self.star.y, 50.0)
         self.assertEqual(self.star.z, 200.0)
@@ -28,7 +28,7 @@ class TestStarModel(unittest.TestCase):
         self.assertIn(self.star.color, STAR_COLORS)
 
     def test_projection_math(self) -> None:
-        """Verify perspective projection coordinates matches optical formula."""
+        """Проверка соответствия вычисленных координат проекции оптической формуле."""
         center_x = 500.0
         center_y = 350.0
         fov = 400.0
@@ -41,21 +41,21 @@ class TestStarModel(unittest.TestCase):
         self.assertAlmostEqual(py, 450.0)
 
     def test_radius_increases_as_star_approaches(self) -> None:
-        """Verify that apparent star radius grows as depth z decreases."""
+        """Проверка увеличения видимого радиуса звезды при уменьшении глубины z."""
         center_x = 500.0
         center_y = 350.0
         fov = 400.0
 
         _, _, radius_far, _, _ = self.star.get_projection(center_x, center_y, fov)
 
-        # Move star closer (decrease z)
+        # Перемещение звезды ближе к наблюдателю (уменьшение z)
         self.star.z = 50.0
         _, _, radius_close, _, _ = self.star.get_projection(center_x, center_y, fov)
 
         self.assertGreater(radius_close, radius_far)
 
     def test_respawn_resets_depth_to_max(self) -> None:
-        """Verify respawn places star back at maximum depth plane."""
+        """Проверка возврата координаты глубины на максимальную плоскость при респавне."""
         self.star.z = 0.5
         self.star.respawn(spread_x=500.0, spread_y=400.0)
         self.assertEqual(self.star.z, self.star.max_z)
@@ -64,14 +64,14 @@ class TestStarModel(unittest.TestCase):
 
 
 class TestStarfieldModel(unittest.TestCase):
-    """Test cases for StarfieldModel manager and global state."""
+    """Набор тестов для менеджера модели StarfieldModel и глобального состояния."""
 
     def setUp(self) -> None:
-        """Initialize standard simulation model."""
+        """Инициализация типовой модели симуляции."""
         self.model = StarfieldModel(num_stars=150, max_z=1000.0, initial_speed=10.0)
 
     def test_star_count(self) -> None:
-        """Verify count adjustment behaves properly."""
+        """Проверка корректности изменения количества звезд в симуляции."""
         self.assertEqual(len(self.model.stars), 150)
         self.model.set_num_stars(300)
         self.assertEqual(len(self.model.stars), 300)
@@ -79,7 +79,7 @@ class TestStarfieldModel(unittest.TestCase):
         self.assertEqual(len(self.model.stars), 50)
 
     def test_pause_toggle(self) -> None:
-        """Verify pause state toggles correctly."""
+        """Проверка корректного переключения состояния паузы."""
         self.assertFalse(self.model.is_paused)
         self.assertTrue(self.model.toggle_pause())
         self.assertTrue(self.model.is_paused)
@@ -87,7 +87,7 @@ class TestStarfieldModel(unittest.TestCase):
         self.assertFalse(self.model.is_paused)
 
     def test_speed_bounds(self) -> None:
-        """Verify speed cannot be set below zero or above safety limit."""
+        """Проверка границ скорости: не опускается ниже нуля и не превышает лимит."""
         self.model.set_speed(25.0)
         self.assertEqual(self.model.speed, 25.0)
 
@@ -98,7 +98,7 @@ class TestStarfieldModel(unittest.TestCase):
         self.assertEqual(self.model.speed, 60.0)
 
     def test_steering_computation(self) -> None:
-        """Verify mouse steering calculates normalized offsets correctly."""
+        """Проверка вычисления нормализованных смещений точки схода от положения мыши."""
         self.model.update_steering(mouse_x=500.0, mouse_y=350.0, width=1000.0, height=700.0)
         self.assertAlmostEqual(self.model.target_offset_x, 0.0)
         self.assertAlmostEqual(self.model.target_offset_y, 0.0)
@@ -107,7 +107,7 @@ class TestStarfieldModel(unittest.TestCase):
         self.assertLess(self.model.target_offset_x, 0.0)
 
     def test_reset_clears_steering(self) -> None:
-        """Verify reset restores vanishing point and offsets."""
+        """Проверка восстановления точки схода и смещений камеры при вызове сброса."""
         self.model.offset_x = 45.0
         self.model.offset_y = -30.0
         self.model.reset()
@@ -117,13 +117,13 @@ class TestStarfieldModel(unittest.TestCase):
         self.assertEqual(self.model.target_offset_y, 0.0)
 
     def test_update_cycle_advances_positions(self) -> None:
-        """Verify update step advances z coordinates when not paused."""
+        """Проверка продвижения координат по оси z на каждом шаге обновления."""
         self.model.update(width=800.0, height=600.0)
         render_data = self.model.get_render_data(800.0, 600.0)
         self.assertEqual(len(render_data), len(self.model.stars))
 
     def test_pause_preserves_positions(self) -> None:
-        """Verify update step does not alter state when paused."""
+        """Проверка неизменности состояния симуляции при активной паузе."""
         self.model.is_paused = True
         z_values_before = [s.z for s in self.model.stars]
         self.model.update(width=800.0, height=600.0)

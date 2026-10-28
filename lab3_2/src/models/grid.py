@@ -1,4 +1,4 @@
-"""Grid model managing discrete nodes, maze generation, and file serialization."""
+"""Модель сетки, управляющая дискретными узлами, генерацией лабиринтов и сериализацией файлов."""
 
 import random
 from pathlib import Path
@@ -7,14 +7,14 @@ from src.models.node import Node, NodeType
 
 
 class Grid:
-    """Two-dimensional grid map containing nodes, walls, and endpoints."""
+    """Двумерная карта сетки, содержащая узлы, стены и граничные точки маршрута."""
 
     def __init__(self, rows: int = 25, cols: int = 40) -> None:
-        """Initialize grid dimensions and default start/goal positions.
+        """Инициализация размеров сетки и расстановка начальных позиций старта и цели.
 
-        Args:
-            rows: Total vertical count of grid rows.
-            cols: Total horizontal count of grid columns.
+        Аргументы:
+            rows: Общее число строк сетки по вертикали.
+            cols: Общее число столбцов сетки по горизонтали.
         """
         self.rows = max(5, rows)
         self.cols = max(5, cols)
@@ -23,7 +23,7 @@ class Grid:
             for r in range(self.rows)
         ]
 
-        # Default start (top-left) and goal (bottom-right)
+        # Начальные позиции по умолчанию: старт (вверху слева) и цель (внизу справа)
         self.start_node = self.nodes[2][2]
         self.start_node.node_type = NodeType.START
 
@@ -31,19 +31,19 @@ class Grid:
         self.goal_node.node_type = NodeType.GOAL
 
     def get_node(self, row: int, col: int) -> Optional[Node]:
-        """Safely fetch node by row and col, returning None if out of bounds."""
+        """Безопасное получение узла по индексам строки и столбца, возвращает None при выходе за границы."""
         if 0 <= row < self.rows and 0 <= col < self.cols:
             return self.nodes[row][col]
         return None
 
     def get_neighbors(self, node: Node) -> List[Node]:
-        """Get 4-way orthogonal neighbors (North, South, East, West).
+        """Получение 4 ортогональных соседей узла (север, юг, запад, восток).
 
-        Args:
-            node: Current node.
+        Аргументы:
+            node: Текущий узел.
 
-        Returns:
-            List of valid, traversable neighboring nodes.
+        Возвращает:
+            Список валидных проходимых соседних узлов.
         """
         neighbors = []
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -54,14 +54,14 @@ class Grid:
         return neighbors
 
     def set_start(self, row: int, col: int) -> bool:
-        """Relocate start point to specified coordinate.
+        """Перемещение точки старта в указанную ячейку.
 
-        Args:
-            row: Target row index.
-            col: Target column index.
+        Аргументы:
+            row: Индекс строки.
+            col: Индекс столбца.
 
-        Returns:
-            True if position was successfully updated.
+        Возвращает:
+            True, если позиция была успешно обновлена.
         """
         target = self.get_node(row, col)
         if target is None or target == self.goal_node:
@@ -74,14 +74,14 @@ class Grid:
         return True
 
     def set_goal(self, row: int, col: int) -> bool:
-        """Relocate goal point to specified coordinate.
+        """Перемещение целевой точки финиша в указанную ячейку.
 
-        Args:
-            row: Target row index.
-            col: Target column index.
+        Аргументы:
+            row: Индекс строки.
+            col: Индекс столбца.
 
-        Returns:
-            True if position was successfully updated.
+        Возвращает:
+            True, если позиция была успешно обновлена.
         """
         target = self.get_node(row, col)
         if target is None or target == self.start_node:
@@ -94,19 +94,19 @@ class Grid:
         return True
 
     def toggle_wall(self, row: int, col: int, make_wall: bool = True) -> None:
-        """Place or erase wall at given cell.
+        """Установка или удаление стены в заданной ячейке.
 
-        Args:
-            row: Row coordinate.
-            col: Column coordinate.
-            make_wall: If True, set wall; if False, make empty.
+        Аргументы:
+            row: Индекс строки.
+            col: Индекс столбца.
+            make_wall: Если True — ставит стену, если False — делает клетку пустой.
         """
         node = self.get_node(row, col)
         if node is not None and node != self.start_node and node != self.goal_node:
             node.node_type = NodeType.WALL if make_wall else NodeType.EMPTY
 
     def clear_search(self) -> None:
-        """Clear search states (open, closed, path) while keeping walls and endpoints."""
+        """Очистка состояний поиска (открытый/закрытый списки, путь) с сохранением стен и точек."""
         for row in self.nodes:
             for node in row:
                 if node != self.start_node and node != self.goal_node:
@@ -118,7 +118,7 @@ class Grid:
                     node.parent = None
 
     def clear_walls(self) -> None:
-        """Clear all obstacle walls from the entire grid."""
+        """Удаление всех стен-препятствий со всей сетки."""
         for row in self.nodes:
             for node in row:
                 if node != self.start_node and node != self.goal_node:
@@ -126,10 +126,10 @@ class Grid:
         self.clear_search()
 
     def generate_random_walls(self, density: float = 0.25) -> None:
-        """Populate grid with random obstacle walls.
+        """Заполнение сетки случайными стенами-препятствиями.
 
-        Args:
-            density: Fraction of cells converted to walls (0.0 to 0.45).
+        Аргументы:
+            density: Доля ячеек, преобразуемых в стены (от 0.0 до 0.45).
         """
         self.clear_walls()
         for row in self.nodes:
@@ -139,14 +139,14 @@ class Grid:
                         node.node_type = NodeType.WALL
 
     def generate_maze(self) -> None:
-        """Generate a labyrinth using the Recursive Backtracker (DFS) algorithm."""
-        # 1. Fill entire grid with walls
+        """Генерация идеального лабиринта с помощью алгоритма Recursive Backtracker (DFS с возвратом)."""
+        # 1. Заполнение всей сетки сплошными стенами
         for row in self.nodes:
             for node in row:
                 node.node_type = NodeType.WALL
                 node.reset_costs()
 
-        # 2. Carve corridors starting from (1, 1) with step 2
+        # 2. Прорубание коридоров начиная с координаты (1, 1) с шагом 2
         start_r, start_c = 1, 1
         stack = [(start_r, start_c)]
         self.nodes[start_r][start_c].node_type = NodeType.EMPTY
@@ -155,7 +155,7 @@ class Grid:
             curr_r, curr_c = stack[-1]
             unvisited_neighbors = []
 
-            # Check neighbors 2 steps away
+            # Проверка соседних клеток через 2 шага
             directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
             random.shuffle(directions)
 
@@ -167,35 +167,35 @@ class Grid:
 
             if unvisited_neighbors:
                 nr, nc, wall_dr, wall_dc = unvisited_neighbors[0]
-                # Knock down wall between cells
+                # Прорубание стены между текущей и новой ячейками
                 self.nodes[curr_r + wall_dr][curr_c + wall_dc].node_type = NodeType.EMPTY
-                # Open destination cell
+                # Открытие целевой ячейки
                 self.nodes[nr][nc].node_type = NodeType.EMPTY
                 stack.append((nr, nc))
             else:
                 stack.pop()
 
-        # 3. Ensure start and goal points are clear corridors
+        # 3. Гарантированное размещение старта и цели в открытых коридорах
         self.start_node = self.nodes[1][1]
         self.start_node.node_type = NodeType.START
 
-        # Find closest open cell for goal near bottom-right
+        # Поиск ближайшей открытой ячейки для цели в нижнем правом углу
         goal_r = self.rows - 2 if (self.rows - 2) % 2 == 1 else self.rows - 3
         goal_c = self.cols - 2 if (self.cols - 2) % 2 == 1 else self.cols - 3
         self.goal_node = self.nodes[goal_r][goal_c]
         self.goal_node.node_type = NodeType.GOAL
 
     def export_to_file(self, filepath: str) -> bool:
-        """Export current grid map layout to a text file.
+        """Экспорт текущей карты сетки в текстовый файл.
 
-        Format:
-            '#' = Wall, '.' = Empty, 'S' = Start, 'G' = Goal
+        Формат:
+            '#' = Стена, '.' = Пусто, 'S' = Старт, 'G' = Цель
 
-        Args:
-            filepath: Target file path to write.
+        Аргументы:
+            filepath: Путь к целевому файлу для записи.
 
-        Returns:
-            True if export succeeded.
+        Возвращает:
+            True, если экспорт прошел успешно.
         """
         try:
             path = Path(filepath)
@@ -222,13 +222,13 @@ class Grid:
             return False
 
     def import_from_file(self, filepath: str) -> bool:
-        """Load and reconstruct grid map from a text file.
+        """Загрузка и реконструкция карты сетки из текстового файла.
 
-        Args:
-            filepath: Source text file path.
+        Аргументы:
+            filepath: Путь к исходному файлу.
 
-        Returns:
-            True if import succeeded and was valid.
+        Возвращает:
+            True, если импорт прошел успешно и файл валиден.
         """
         try:
             path = Path(filepath)
@@ -265,7 +265,7 @@ class Grid:
                     else:
                         node.node_type = NodeType.EMPTY
 
-            # Apply imported map
+            # Применение импортированной карты
             self.rows = new_rows
             self.cols = new_cols
             self.nodes = new_grid

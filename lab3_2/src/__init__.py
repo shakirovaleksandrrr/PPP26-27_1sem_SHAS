@@ -1,1 +1,1 @@
-"""Package for A* pathfinding visualization application."""
+"""Пакет модулей для визуализации алгоритма A* и поиска пути."""

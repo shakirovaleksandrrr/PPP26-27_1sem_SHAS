@@ -1,29 +1,29 @@
-"""Star model representing a single celestial body in 3D space."""
+"""Модель звезды, представляющая отдельное небесное тело в 3D-пространстве."""
 
 import random
 from typing import Tuple
 
-# Natural stellar spectral colors
+# Естественные спектральные цвета звезд
 STAR_COLORS = [
-    "#ffffff",  # White (Class A)
-    "#e0f7fa",  # Light Cyan (Class B)
-    "#80d8ff",  # Blue (Class O)
-    "#fff9c4",  # Yellow-White (Class F/G)
-    "#ffe0b2",  # Light Orange (Class K)
+    "#ffffff",  # Белый (Спектральный класс A)
+    "#e0f7fa",  # Светло-голубой (Спектральный класс B)
+    "#80d8ff",  # Синий (Спектральный класс O)
+    "#fff9c4",  # Желтовато-белый (Спектральный класс F/G)
+    "#ffe0b2",  # Светло-оранжевый (Спектральный класс K)
 ]
 
 
 class Star:
-    """Represents a 3D star with spatial coordinates, color, and depth history."""
+    """Представляет 3D-звезду с пространственными координатами, цветом и историей глубины."""
 
     def __init__(self, x: float, y: float, z: float, max_z: float) -> None:
-        """Initialize star coordinates and visual properties.
+        """Инициализация координат звезды и визуальных свойств.
 
-        Args:
-            x: Initial X coordinate relative to projection center.
-            y: Initial Y coordinate relative to projection center.
-            z: Depth coordinate along camera axis (z > 0).
-            max_z: Maximum depth plane for respawning.
+        Аргументы:
+            x: Начальная координата X относительно центра проекции.
+            y: Начальная координата Y относительно центра проекции.
+            z: Координата глубины вдоль оси камеры (z > 0).
+            max_z: Максимальная плоскость глубины для перерождения звезды.
         """
         self.x = x
         self.y = y
@@ -34,11 +34,11 @@ class Star:
         self.color = random.choice(STAR_COLORS)
 
     def respawn(self, spread_x: float, spread_y: float) -> None:
-        """Respawn the star on the farthest plane when it leaves the field of view.
+        """Перерождение звезды на дальней плоскости при выходе за пределы обзора.
 
-        Args:
-            spread_x: Half-width of coordinate distribution.
-            spread_y: Half-height of coordinate distribution.
+        Аргументы:
+            spread_x: Полуширина распределения координат.
+            spread_y: Полувысота распределения координат.
         """
         self.x = random.uniform(-spread_x, spread_x)
         self.y = random.uniform(-spread_y, spread_y)
@@ -48,12 +48,12 @@ class Star:
         self.color = random.choice(STAR_COLORS)
 
     def update(self, speed: float, spread_x: float, spread_y: float) -> None:
-        """Update star depth according to flight speed, respawning if behind camera.
+        """Обновление глубины звезды по скорости полета и респавн при пролете за камеру.
 
-        Args:
-            speed: Velocity along the Z axis toward the viewer.
-            spread_x: Half-width of field for respawning.
-            spread_y: Half-height of field for respawning.
+        Аргументы:
+            speed: Скорость движения вдоль оси Z по направлению к наблюдателю.
+            spread_x: Полуширина области для респавна.
+            spread_y: Полувысота области для респавна.
         """
         self.prev_z = self.z
         self.z -= speed
@@ -67,25 +67,25 @@ class Star:
         center_y: float,
         fov_distance: float
     ) -> Tuple[float, float, float, float, float]:
-        """Compute 2D perspective projection for current and previous positions.
+        """Вычисление 2D-перспективной проекции для текущей и предыдущей позиций.
 
-        Args:
-            center_x: Horizontal screen center (vanishing point).
-            center_y: Vertical screen center (vanishing point).
-            fov_distance: Camera focal length / field of view multiplier.
+        Аргументы:
+            center_x: Горизонтальный центр экрана (точка схода).
+            center_y: Вертикальный центр экрана (точка схода).
+            fov_distance: Фокусное расстояние камеры / множитель поля зрения.
 
-        Returns:
-            Tuple of (curr_screen_x, curr_screen_y, radius, prev_screen_x, prev_screen_y).
+        Возвращает:
+            Кортеж (curr_screen_x, curr_screen_y, radius, prev_screen_x, prev_screen_y).
         """
-        # Perspective projection formula: screen_x = (x / z) * fov + center_x
+        # Формула перспективной проекции: screen_x = (x / z) * fov + center_x
         scale = fov_distance / self.z
         screen_x = self.x * scale + center_x
         screen_y = self.y * scale + center_y
 
-        # Apparent radius increases inversely with distance z
+        # Видимый радиус возрастает обратно пропорционально расстоянию z
         radius = max(0.5, self.base_radius * (fov_distance / (self.z * 1.5)))
 
-        # Previous position for drawing warp trails
+        # Предыдущая позиция для отрисовки шлейфов гиперпрыжка
         prev_scale = fov_distance / max(1.0, self.prev_z)
         prev_screen_x = self.x * prev_scale + center_x
         prev_screen_y = self.y * prev_scale + center_y

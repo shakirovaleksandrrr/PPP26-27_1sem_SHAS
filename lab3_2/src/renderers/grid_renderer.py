@@ -1,30 +1,30 @@
-"""Grid renderer for drawing pathfinding nodes, walls, states, and telemetry HUD."""
+"""Рендерер сетки для отрисовки узлов, стен, состояний поиска и телеметрии HUD."""
 
 import tkinter as tk
 from typing import Optional, Tuple
 from src.models.grid import Grid
 from src.models.node import Node, NodeType
 
-# Color palette (Catppuccin Macchiato inspired dark theme)
+# Цветовая палитра для состояний ячеек (темная тема)
 COLORS = {
     NodeType.EMPTY: "#1e2030",
     NodeType.WALL: "#11121d",
-    NodeType.START: "#a6da95",    # Green
-    NodeType.GOAL: "#ed8796",     # Red
-    NodeType.OPEN: "#8aadf4",     # Blue
-    NodeType.CLOSED: "#5b6078",   # Dark Slate / Muted Purple
-    NodeType.PATH: "#eed49f",     # Bright Gold
+    NodeType.START: "#a6da95",    # Зеленый (старт)
+    NodeType.GOAL: "#ed8796",     # Красный (цель)
+    NodeType.OPEN: "#8aadf4",     # Голубой (открытый список / кандидаты)
+    NodeType.CLOSED: "#5b6078",   # Сине-серый (закрытый список / посещенные)
+    NodeType.PATH: "#eed49f",     # Золотистый (кратчайший путь)
 }
 
 
 class GridRenderer:
-    """Renders 2D grid cells, search progress, and path on Tkinter Canvas."""
+    """Отрисовывает 2D-сетку, процесс поиска и найденный маршрут на Tkinter Canvas."""
 
     def __init__(self, canvas: tk.Canvas) -> None:
-        """Initialize renderer with target Tkinter canvas.
+        """Инициализация рендерера целевым холстом Tkinter Canvas.
 
-        Args:
-            canvas: Tkinter Canvas widget instance.
+        Аргументы:
+            canvas: Экземпляр виджета Tkinter Canvas.
         """
         self.canvas = canvas
         self.cell_size: int = 24
@@ -32,12 +32,12 @@ class GridRenderer:
         self.offset_y: int = 40
 
     def compute_layout(self, grid: Grid, canvas_width: int, canvas_height: int) -> None:
-        """Compute optimal cell size and centering margins.
+        """Расчет оптимального размера ячеек и отступов для центрирования сетки.
 
-        Args:
-            grid: Grid model.
-            canvas_width: Available canvas width in pixels.
-            canvas_height: Available canvas height in pixels.
+        Аргументы:
+            grid: Модель сетки Grid.
+            canvas_width: Доступная ширина холста в пикселях.
+            canvas_height: Доступная высота холста в пикселях.
         """
         top_bar_height = 45
         avail_w = max(100, canvas_width - 20)
@@ -54,15 +54,15 @@ class GridRenderer:
         self.offset_y = max(top_bar_height, (canvas_height - top_bar_height - grid_h) // 2 + top_bar_height)
 
     def screen_to_cell(self, screen_x: int, screen_y: int, grid: Grid) -> Optional[Tuple[int, int]]:
-        """Convert screen pixel coordinates to grid (row, col) indices.
+        """Преобразование пиксельных экранных координат мыши в индексы (row, col) сетки.
 
-        Args:
-            screen_x: Mouse X coordinate.
-            screen_y: Mouse Y coordinate.
-            grid: Grid model.
+        Аргументы:
+            screen_x: Экранная координата X.
+            screen_y: Экранная координата Y.
+            grid: Модель сетки.
 
-        Returns:
-            Tuple of (row, col) or None if click is outside grid area.
+        Возвращает:
+            Кортеж (row, col) или None, если клик совершен вне сетки.
         """
         col = (screen_x - self.offset_x) // self.cell_size
         row = (screen_y - self.offset_y) // self.cell_size
@@ -80,21 +80,21 @@ class GridRenderer:
         canvas_width: int,
         canvas_height: int
     ) -> None:
-        """Draw complete grid, cell states, and HUD metrics on canvas.
+        """Отрисовка всей сетки, состояний ячеек и телеметрии на холсте.
 
-        Args:
-            grid: Grid model containing nodes.
-            algorithm_name: Name of currently active algorithm.
-            visited_count: Count of evaluated nodes in closed set.
-            path_length: Number of steps in final path.
-            status_text: Status description string.
-            canvas_width: Canvas width.
-            canvas_height: Canvas height.
+        Аргументы:
+            grid: Модель сетки, содержащая узлы.
+            algorithm_name: Название текущего выбранного алгоритма.
+            visited_count: Число исследованных узлов в закрытом списке.
+            path_length: Число шагов в итоговом найденном пути.
+            status_text: Текстовое описание текущего статуса симуляции.
+            canvas_width: Ширина холста.
+            canvas_height: Высота холста.
         """
         self.canvas.delete("all")
         self.compute_layout(grid, canvas_width, canvas_height)
 
-        # 1. Draw top telemetry HUD
+        # 1. Отрисовка верхней информационной панели (HUD)
         hud_text = (
             f"Алгоритм: {algorithm_name}  |  "
             f"Посещено ячеек: {visited_count}  |  "
@@ -109,7 +109,7 @@ class GridRenderer:
             font=("Consolas", 11, "bold")
         )
 
-        # 2. Draw Grid Cells
+        # 2. Отрисовка ячеек сетки
         cs = self.cell_size
         ox = self.offset_x
         oy = self.offset_y
@@ -124,7 +124,7 @@ class GridRenderer:
 
                 cell_color = COLORS.get(node.node_type, "#1e2030")
 
-                # Cell rectangle
+                # Прямоугольник ячейки
                 self.canvas.create_rectangle(
                     x1, y1, x2, y2,
                     fill=cell_color,
@@ -132,7 +132,7 @@ class GridRenderer:
                     width=1
                 )
 
-                # Special icons/markers for Start and Goal
+                # Специальные маркеры для старта (S) и цели (G)
                 if node.node_type == NodeType.START:
                     pad = max(2, cs // 4)
                     self.canvas.create_oval(

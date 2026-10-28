@@ -1,1 +1,1 @@
-"""Package for Starfield 3D animation project."""
+"""Пакет модулей для 3D-анимации звездного поля."""

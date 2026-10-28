@@ -1,4 +1,4 @@
-"""Pathfinding algorithms implementation: A*, Dijkstra, BFS, and Greedy Best-First."""
+"""Реализация алгоритмов поиска пути на сетке: A*, Дейкстра, BFS и жадный поиск (Greedy Best-First)."""
 
 import heapq
 import math
@@ -10,22 +10,22 @@ from src.models.node import Node, NodeType
 
 
 class HeuristicType(Enum):
-    """Supported distance heuristics for informed search."""
+    """Поддерживаемые эвристики расстояния для информированного поиска."""
     MANHATTAN = "Манхэттен"
     EUCLIDEAN = "Евклид"
     CHEBYSHEV = "Чебышев"
 
 
 def calculate_heuristic(n1: Node, n2: Node, h_type: HeuristicType = HeuristicType.MANHATTAN) -> float:
-    """Calculate heuristic distance estimate between two grid nodes.
+    """Вычисление эвристической оценки расстояния между двумя узлами сетки.
 
-    Args:
-        n1: Source node.
-        n2: Target / goal node.
-        h_type: Distance formula metric.
+    Аргументы:
+        n1: Исходный узел.
+        n2: Целевой узел назначения.
+        h_type: Метрика расстояния.
 
-    Returns:
-        Estimated distance as float.
+    Возвращает:
+        Оценочное расстояние в виде числа с плавающей точкой.
     """
     dr = abs(n1.row - n2.row)
     dc = abs(n1.col - n2.col)
@@ -39,14 +39,14 @@ def calculate_heuristic(n1: Node, n2: Node, h_type: HeuristicType = HeuristicTyp
 
 
 class BasePathfinder:
-    """Abstract base class for pathfinding search algorithms."""
+    """Абстрактный базовый класс для алгоритмов поиска пути на дискретной сетке."""
 
     def __init__(self, grid: Grid, heuristic: HeuristicType = HeuristicType.MANHATTAN) -> None:
-        """Initialize pathfinder on specified grid.
+        """Инициализация алгоритма поиска на заданной сетке.
 
-        Args:
-            grid: Grid model instance.
-            heuristic: Distance heuristic function to use.
+        Аргументы:
+            grid: Экземпляр модели сетки Grid.
+            heuristic: Используемая эвристическая функция расстояния.
         """
         self.grid = grid
         self.heuristic = heuristic
@@ -62,7 +62,7 @@ class BasePathfinder:
         self.reset()
 
     def reset(self) -> None:
-        """Reset search structures and prepare initial frontier."""
+        """Сброс внутренних структур данных поиска и подготовка начального фронта."""
         self.grid.clear_search()
         self.start_node = self.grid.start_node
         self.goal_node = self.grid.goal_node
@@ -73,10 +73,10 @@ class BasePathfinder:
         self.path = []
 
     def reconstruct_path(self) -> List[Node]:
-        """Reconstruct shortest path by following node parent pointers from goal to start.
+        """Восстановление кратчайшего пути по цепочке родительских указателей от цели к старту.
 
-        Returns:
-            Ordered list of nodes forming the path from start to goal.
+        Возвращает:
+            Упорядоченный список узлов, образующих маршрут от старта к цели.
         """
         path = []
         curr = self.goal_node
@@ -91,18 +91,18 @@ class BasePathfinder:
         return path
 
     def step(self) -> bool:
-        """Execute one step of the search algorithm.
+        """Выполнение одной дискретной итерации алгоритма поиска.
 
-        Returns:
-            True if search should continue, False if search finished.
+        Возвращает:
+            True, если поиск продолжается; False, если поиск завершен.
         """
         raise NotImplementedError
 
     def run_all(self) -> Tuple[List[Node], bool]:
-        """Execute search until completion immediately.
+        """Немедленное выполнение поиска до полного завершения.
 
-        Returns:
-            Tuple of (reconstructed_path, is_found).
+        Возвращает:
+            Кортеж (восстановленный_путь, флаг_успеха).
         """
         while self.step():
             pass
@@ -110,24 +110,24 @@ class BasePathfinder:
 
 
 class AStarFinder(BasePathfinder):
-    """A* Pathfinding Algorithm (f = g + h). Guaranteed to find shortest path."""
+    """Алгоритм A* (f = g + h). Гарантирует нахождение математически кратчайшего пути."""
 
     def reset(self) -> None:
-        """Initialize A* priority queue with start node."""
+        """Инициализация очереди с приоритетом начальным узлом."""
         super().reset()
         self.start_node.g_cost = 0.0
         self.start_node.h_cost = calculate_heuristic(self.start_node, self.goal_node, self.heuristic)
         self.start_node.f_cost = self.start_node.g_cost + self.start_node.h_cost
 
         self.count = 0
-        # Priority queue item: (f_cost, count, node)
+        # Элемент очереди с приоритетом: (f_cost, счетчик_добавления, узел)
         self.open_set: List[Tuple[float, int, Node]] = []
         heapq.heappush(self.open_set, (self.start_node.f_cost, self.count, self.start_node))
         self.open_set_hash: Set[Node] = {self.start_node}
         self.closed_set: Set[Node] = set()
 
     def step(self) -> bool:
-        """Perform one iteration of A* expansion."""
+        """Выполнение одной итерации раскрытия узла алгоритмом A*."""
         if self.is_finished or not self.open_set:
             self.is_finished = True
             return False
@@ -150,7 +150,7 @@ class AStarFinder(BasePathfinder):
             if neighbor in self.closed_set:
                 continue
 
-            tentative_g = current.g_cost + 1.0  # Unit grid step cost
+            tentative_g = current.g_cost + 1.0  # Единичная стоимость шага по сетке
 
             if tentative_g < neighbor.g_cost:
                 neighbor.parent = current
@@ -169,10 +169,10 @@ class AStarFinder(BasePathfinder):
 
 
 class DijkstraFinder(BasePathfinder):
-    """Dijkstra's Algorithm (equivalent to A* with h = 0)."""
+    """Алгоритм Дейкстры (эквивалентен A* с эвристикой h = 0)."""
 
     def reset(self) -> None:
-        """Initialize priority queue with start node."""
+        """Инициализация очереди с приоритетом начальным узлом со стоимостью 0."""
         super().reset()
         self.start_node.g_cost = 0.0
         self.start_node.f_cost = 0.0
@@ -184,7 +184,7 @@ class DijkstraFinder(BasePathfinder):
         self.closed_set: Set[Node] = set()
 
     def step(self) -> bool:
-        """Perform one iteration of Dijkstra expansion."""
+        """Выполнение одной итерации раскрытия узла алгоритмом Дейкстры."""
         if self.is_finished or not self.open_set:
             self.is_finished = True
             return False
@@ -225,16 +225,16 @@ class DijkstraFinder(BasePathfinder):
 
 
 class BFSFinder(BasePathfinder):
-    """Breadth-First Search (BFS) using FIFO queue."""
+    """Поиск в ширину (BFS) с использованием очереди FIFO."""
 
     def reset(self) -> None:
-        """Initialize FIFO queue with start node."""
+        """Инициализация очереди FIFO начальным узлом."""
         super().reset()
         self.queue: Deque[Node] = deque([self.start_node])
         self.visited: Set[Node] = {self.start_node}
 
     def step(self) -> bool:
-        """Perform one iteration of BFS exploration."""
+        """Выполнение одной итерации исследования в ширину."""
         if self.is_finished or not self.queue:
             self.is_finished = True
             return False
@@ -263,10 +263,10 @@ class BFSFinder(BasePathfinder):
 
 
 class GreedyBestFirstFinder(BasePathfinder):
-    """Greedy Best-First Search prioritizing solely by heuristic h(n)."""
+    """Жадный поиск по первому наилучшему совпадению (сортировка строго по h(n))."""
 
     def reset(self) -> None:
-        """Initialize priority queue sorted strictly by heuristic h(n)."""
+        """Инициализация очереди с приоритетом, отсортированной исключительно по оценке h(n)."""
         super().reset()
         self.start_node.h_cost = calculate_heuristic(self.start_node, self.goal_node, self.heuristic)
 
@@ -277,7 +277,7 @@ class GreedyBestFirstFinder(BasePathfinder):
         self.closed_set: Set[Node] = set()
 
     def step(self) -> bool:
-        """Perform one iteration of Greedy Best-First Search."""
+        """Выполнение одной итерации жадного поиска."""
         if self.is_finished or not self.open_set:
             self.is_finished = True
             return False

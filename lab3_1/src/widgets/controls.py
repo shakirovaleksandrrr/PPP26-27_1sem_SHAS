@@ -1,11 +1,11 @@
-"""Interactive control panel widget with sliders, toggles, and buttons."""
+"""Интерактивная панель управления со слайдерами, переключателями и кнопками."""
 
 import tkinter as tk
 from typing import Callable
 
 
 class ControlsFrame(tk.Frame):
-    """Bottom control panel with interactive UI controls for simulation parameters."""
+    """Нижняя панель управления с интерактивными элементами для настройки параметров симуляции."""
 
     def __init__(
         self,
@@ -19,18 +19,18 @@ class ControlsFrame(tk.Frame):
         initial_count: int = 500,
         initial_warp: bool = True
     ) -> None:
-        """Initialize control panel elements.
+        """Инициализация элементов панели управления.
 
-        Args:
-            master: Parent widget.
-            on_speed_change: Callback invoked when speed slider moves.
-            on_count_change: Callback invoked when star count slider moves.
-            on_warp_toggle: Callback invoked when warp trail checkbox changes.
-            on_pause_toggle: Callback invoked when pause button is pressed.
-            on_reset: Callback invoked when reset button is pressed.
-            initial_speed: Initial speed slider value.
-            initial_count: Initial star count slider value.
-            initial_warp: Initial warp trails checkbox state.
+        Аргументы:
+            master: Родительский виджет.
+            on_speed_change: Обратный вызов при перемещении слайдера скорости.
+            on_count_change: Обратный вызов при перемещении слайдера числа звезд.
+            on_warp_toggle: Обратный вызов при изменении флага шлейфов warp speed.
+            on_pause_toggle: Обратный вызов при нажатии кнопки паузы.
+            on_reset: Обратный вызов при нажатии кнопки сброса.
+            initial_speed: Начальное значение скорости на слайдере.
+            initial_count: Начальное число звезд на слайдере.
+            initial_warp: Начальное состояние переключателя шлейфов.
         """
         super().__init__(master, bg="#12121f", padx=15, pady=8)
 
@@ -40,11 +40,11 @@ class ControlsFrame(tk.Frame):
         self.on_pause_toggle = on_pause_toggle
         self.on_reset = on_reset
 
-        # Label font and colors
+        # Шрифт и цвета меток
         lbl_font = ("Segoe UI", 9, "bold")
         lbl_fg = "#eceff1"
 
-        # 1. Speed Slider
+        # 1. Слайдер скорости
         speed_frame = tk.Frame(self, bg="#12121f")
         speed_frame.pack(side=tk.LEFT, padx=15)
         tk.Label(
@@ -71,7 +71,7 @@ class ControlsFrame(tk.Frame):
         self.speed_slider.set(initial_speed)
         self.speed_slider.pack()
 
-        # 2. Star Count Slider
+        # 2. Слайдер количества звезд
         count_frame = tk.Frame(self, bg="#12121f")
         count_frame.pack(side=tk.LEFT, padx=15)
         tk.Label(
@@ -98,7 +98,7 @@ class ControlsFrame(tk.Frame):
         self.count_slider.set(initial_count)
         self.count_slider.pack()
 
-        # 3. Warp Trails Checkbox
+        # 3. Чекбокс шлейфов гиперпрыжка (Warp Trails)
         self.warp_var = tk.BooleanVar(value=initial_warp)
         self.warp_check = tk.Checkbutton(
             self,
@@ -114,7 +114,7 @@ class ControlsFrame(tk.Frame):
         )
         self.warp_check.pack(side=tk.LEFT, padx=15)
 
-        # 4. Action Buttons (Pause & Reset)
+        # 4. Кнопки управления (Пауза и Сброс)
         btn_frame = tk.Frame(self, bg="#12121f")
         btn_frame.pack(side=tk.RIGHT, padx=10)
 
@@ -151,29 +151,29 @@ class ControlsFrame(tk.Frame):
         self.btn_reset.pack(side=tk.LEFT, padx=5)
 
     def _handle_speed_slider(self, val: str) -> None:
-        """Handle speed slider movement."""
+        """Обработка движения слайдера скорости."""
         self.on_speed_change(float(val))
 
     def _handle_count_slider(self, val: str) -> None:
-        """Handle count slider movement."""
+        """Обработка движения слайдера количества звезд."""
         self.on_count_change(int(float(val)))
 
     def _handle_warp_toggle(self) -> None:
-        """Handle warp checkbox state change."""
+        """Обработка переключения чекбокса световых шлейфов."""
         self.on_warp_toggle(self.warp_var.get())
 
     def _handle_pause_button(self) -> None:
-        """Handle pause button click and update its text."""
+        """Обработка нажатия кнопки паузы и обновление ее текста."""
         is_paused = self.on_pause_toggle()
         self.update_pause_button_text(is_paused)
 
     def update_pause_button_text(self, is_paused: bool) -> None:
-        """Update text on pause button depending on state."""
+        """Обновление надписи и цвета кнопки паузы в зависимости от состояния."""
         if is_paused:
             self.btn_pause.config(text="Старт (Space)", bg="#2e7d32")
         else:
             self.btn_pause.config(text="Пауза (Space)", bg="#37474f")
 
     def sync_speed(self, speed: float) -> None:
-        """Programmatically synchronize slider with external speed updates."""
+        """Программная синхронизация положения слайдера при изменении скорости с клавиатуры."""
         self.speed_slider.set(speed)

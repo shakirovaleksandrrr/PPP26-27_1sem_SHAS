@@ -1,4 +1,4 @@
-"""Widgets package for UI control panels and interactive elements."""
+"""Пакет пользовательских виджетов и интерактивных панелей управления."""
 
 from src.widgets.controls import ControlsFrame
 

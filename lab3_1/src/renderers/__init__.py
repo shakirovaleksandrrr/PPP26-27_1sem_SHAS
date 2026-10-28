@@ -1,4 +1,4 @@
-"""Renderers package for graphics rendering."""
+"""Пакет модулей графического рендеринга."""
 
 from src.renderers.star_renderer import StarRenderer
 

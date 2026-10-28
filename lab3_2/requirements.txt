@@ -1,3 +1,3 @@
-# Standard Python library (Tkinter, heapq, math) is used.
-# External packages are not required.
-# Python >= 3.9
+# Используется стандартная библиотека Python (Tkinter, heapq, math).
+# Внешние сторонние пакеты не требуются.
+# Требуемая версия: Python >= 3.9

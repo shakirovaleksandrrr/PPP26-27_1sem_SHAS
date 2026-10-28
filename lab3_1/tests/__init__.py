@@ -1,1 +1,1 @@
-"""Test suite package for Starfield mathematical logic."""
+"""Пакет модульных тестов для математической логики звездного поля."""

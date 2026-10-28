@@ -1,4 +1,4 @@
-"""Renderers package for grid and path graphics."""
+"""Пакет модулей рендеринга сетки и маршрутов."""
 
 from src.renderers.grid_renderer import GridRenderer
 

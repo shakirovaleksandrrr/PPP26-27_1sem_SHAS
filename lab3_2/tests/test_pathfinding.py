@@ -1,4 +1,4 @@
-"""Unit tests for A*, Dijkstra, BFS pathfinding and grid models."""
+"""Модульные тесты для алгоритмов поиска пути A*, Дейкстры, BFS и модели сетки."""
 
 import os
 import sys
@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-# Ensure lab3_2 directory is in sys.path
+# Добавление каталога лабораторной работы в sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.models.grid import Grid
@@ -22,26 +22,26 @@ from src.models.pathfinders import (
 
 
 class TestPathfindingAlgorithms(unittest.TestCase):
-    """Test suite verifying pathfinding optimality and grid behavior."""
+    """Набор тестов для проверки оптимальности поиска пути и поведения сетки."""
 
     def setUp(self) -> None:
-        """Create fresh grid for each test."""
+        """Создание новой чистой сетки перед каждым тестом."""
         self.grid = Grid(rows=12, cols=12)
 
     def test_heuristics(self) -> None:
-        """Verify distance formulas for Manhattan, Euclidean, and Chebyshev metrics."""
+        """Проверка формул вычисления расстояний: Манхэттен, Евклид и Чебышев."""
         n1 = Node(0, 0)
         n2 = Node(3, 4)
 
-        # Manhattan: |3-0| + |4-0| = 7.0
+        # Манхэттенское расстояние: |3-0| + |4-0| = 7.0
         self.assertEqual(calculate_heuristic(n1, n2, HeuristicType.MANHATTAN), 7.0)
-        # Euclidean: sqrt(3^2 + 4^2) = 5.0
+        # Евклидово расстояние: sqrt(3^2 + 4^2) = 5.0
         self.assertEqual(calculate_heuristic(n1, n2, HeuristicType.EUCLIDEAN), 5.0)
-        # Chebyshev: max(3, 4) = 4.0
+        # Расстояние Чебышева: max(3, 4) = 4.0
         self.assertEqual(calculate_heuristic(n1, n2, HeuristicType.CHEBYSHEV), 4.0)
 
     def test_astar_finds_optimal_path(self) -> None:
-        """Verify A* finds the mathematically shortest route on unobstructed grid."""
+        """Проверка нахождения алгоритмом A* математически кратчайшего пути на свободной сетке."""
         self.grid.set_start(0, 0)
         self.grid.set_goal(5, 5)
 
@@ -49,18 +49,18 @@ class TestPathfindingAlgorithms(unittest.TestCase):
         path, is_found = finder.run_all()
 
         self.assertTrue(is_found)
-        # Path includes start and goal, so length is Manhattan distance + 1
+        # Путь включает начальную и конечную точки, длина = манхэттенское расстояние + 1
         expected_len = abs(5 - 0) + abs(5 - 0) + 1
         self.assertEqual(len(path), expected_len)
         self.assertEqual(path[0], self.grid.start_node)
         self.assertEqual(path[-1], self.grid.goal_node)
 
     def test_astar_navigates_around_walls(self) -> None:
-        """Verify A* successfully routes around a blocking vertical wall."""
+        """Проверка успешного обхода алгоритмом A* вертикальной стены-препятствия."""
         self.grid.set_start(2, 2)
         self.grid.set_goal(2, 6)
 
-        # Place vertical wall between start and goal: col 4 from row 0 to 4
+        # Установка вертикальной стены между стартом и целью: колонка 4 с 0 по 4 строки
         for r in range(0, 5):
             self.grid.toggle_wall(r, 4, make_wall=True)
 
@@ -69,16 +69,16 @@ class TestPathfindingAlgorithms(unittest.TestCase):
 
         self.assertTrue(is_found)
         self.assertGreater(len(path), 0)
-        # Path must not traverse any wall
+        # Путь не должен содержать ни одного узла-стены
         for node in path:
             self.assertNotEqual(node.node_type, NodeType.WALL)
 
     def test_astar_unreachable_goal(self) -> None:
-        """Verify A* handles completely blocked goals gracefully."""
+        """Проверка корректной обработки ситуации при полностью заблокированной цели."""
         self.grid.set_start(0, 0)
         self.grid.set_goal(2, 2)
 
-        # Enclose goal with surrounding walls
+        # Окружение цели сплошным кольцом стен
         for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             self.grid.toggle_wall(2 + dr, 2 + dc, make_wall=True)
 
@@ -89,18 +89,18 @@ class TestPathfindingAlgorithms(unittest.TestCase):
         self.assertEqual(len(path), 0)
 
     def test_dijkstra_finds_same_optimal_length(self) -> None:
-        """Verify Dijkstra finds the identical optimal shortest path length as A*."""
+        """Проверка совпадения длины кратчайшего пути у алгоритма Дейкстры и A*."""
         self.grid.set_start(1, 1)
         self.grid.set_goal(8, 8)
-        # Place an L-shaped obstacle
+        # Установка Г-образного препятствия
         for r in range(3, 7):
             self.grid.toggle_wall(r, 5, make_wall=True)
 
-        # Run A*
+        # Запуск A*
         astar = AStarFinder(self.grid)
         astar_path, astar_found = astar.run_all()
 
-        # Run Dijkstra on identical obstacle grid
+        # Запуск Дейкстры на той же конфигурации
         self.grid.clear_search()
         dijkstra = DijkstraFinder(self.grid)
         dijkstra_path, dijkstra_found = dijkstra.run_all()
@@ -108,11 +108,11 @@ class TestPathfindingAlgorithms(unittest.TestCase):
         self.assertTrue(astar_found)
         self.assertTrue(dijkstra_found)
         self.assertEqual(len(astar_path), len(dijkstra_path))
-        # A* with heuristic typically visits fewer or equal nodes than uninformed Dijkstra
+        # Алгоритм A* с эвристикой исследует меньше либо столько же узлов, сколько Дейкстра
         self.assertLessEqual(astar.visited_count, dijkstra.visited_count)
 
     def test_bfs_finds_path(self) -> None:
-        """Verify Breadth-First Search finds the optimal hop count."""
+        """Проверка нахождения корректного пути алгоритмом поиска в ширину (BFS)."""
         self.grid.set_start(0, 0)
         self.grid.set_goal(4, 4)
 
@@ -123,8 +123,7 @@ class TestPathfindingAlgorithms(unittest.TestCase):
         self.assertEqual(len(path), 9)
 
     def test_maze_generator(self) -> None:
-        """Verify recursive backtracker maze produces valid connected path."""
-        # Use odd dimensions for maze carving
+        """Проверка генерации связного пути в лабиринте (Recursive Backtracker)."""
         maze_grid = Grid(rows=15, cols=15)
         maze_grid.generate_maze()
 
@@ -135,7 +134,7 @@ class TestPathfindingAlgorithms(unittest.TestCase):
         self.assertGreater(len(path), 0)
 
     def test_grid_export_and_import(self) -> None:
-        """Verify map serializing to disk and reconstructing preserves structure."""
+        """Проверка сериализации карты в текстовый файл и ее точного восстановления."""
         with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
             tmp_path = tmp.name
 
@@ -145,10 +144,10 @@ class TestPathfindingAlgorithms(unittest.TestCase):
             self.grid.toggle_wall(2, 3, make_wall=True)
             self.grid.toggle_wall(3, 3, make_wall=True)
 
-            # Export
+            # Экспорт карты в файл
             self.assertTrue(self.grid.export_to_file(tmp_path))
 
-            # Import into new grid
+            # Импорт карты в новый экземпляр сетки
             new_grid = Grid(rows=5, cols=5)
             self.assertTrue(new_grid.import_from_file(tmp_path))
 

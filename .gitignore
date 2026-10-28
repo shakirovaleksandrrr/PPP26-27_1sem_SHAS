@@ -1,14 +1,14 @@
-# Python bytecode
+# Байт-код Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Testing caches
+# Кэш тестов и покрытия
 .pytest_cache/
 .coverage
 htmlcov/
 
-# IDE files
+# Файлы IDE и редакторов
 .vscode/
 .idea/
 *.swp

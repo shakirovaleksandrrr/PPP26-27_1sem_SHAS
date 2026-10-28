@@ -1,4 +1,4 @@
-"""Control panel widget for configuring pathfinding algorithms, maze generation, and animation."""
+"""Виджет панели управления для настройки алгоритмов поиска, генерации лабиринтов и управления анимацией."""
 
 import tkinter as tk
 from tkinter import ttk
@@ -6,7 +6,7 @@ from typing import Callable, List
 
 
 class ControlsFrame(tk.Frame):
-    """Bottom control panel with interactive UI controls for algorithm manipulation."""
+    """Нижняя панель управления с интерактивными элементами для настройки параметров поиска пути."""
 
     def __init__(
         self,
@@ -26,24 +26,24 @@ class ControlsFrame(tk.Frame):
         initial_heuristic: str = "Манхэттен",
         initial_delay: int = 15
     ) -> None:
-        """Initialize controls panel and action triggers.
+        """Инициализация панели управления и привязка действий к кнопкам.
 
-        Args:
-            master: Parent widget.
-            on_start_toggle: Callback for Start/Pause toggle button.
-            on_step: Callback for single step button.
-            on_reset_search: Callback for resetting path.
-            on_clear_all: Callback for clearing walls and field.
-            on_generate_maze: Callback for maze generation.
-            on_generate_random: Callback for random walls generation.
-            on_algorithm_change: Callback when user picks a different algorithm.
-            on_heuristic_change: Callback when user picks a different distance metric.
-            on_delay_change: Callback for animation speed slider.
-            on_export: Callback for exporting map file.
-            on_import: Callback for importing map file.
-            initial_algorithm: Selected algorithm default name.
-            initial_heuristic: Selected heuristic default name.
-            initial_delay: Default delay in milliseconds.
+        Аргументы:
+            master: Родительский виджет.
+            on_start_toggle: Обратный вызов для кнопки Старт/Пауза.
+            on_step: Обратный вызов для выполнения одного дискретного шага.
+            on_reset_search: Обратный вызов для сброса найденного пути.
+            on_clear_all: Обратный вызов для очистки всех стен и поля.
+            on_generate_maze: Обратный вызов для генерации лабиринта.
+            on_generate_random: Обратный вызов для генерации случайных препятствий.
+            on_algorithm_change: Обратный вызов при смене алгоритма поиска.
+            on_heuristic_change: Обратный вызов при выборе метрики расстояния.
+            on_delay_change: Обратный вызов слайдера скорости анимации.
+            on_export: Обратный вызов для экспорта карты в файл.
+            on_import: Обратный вызов для импорта карты из файла.
+            initial_algorithm: Начальное название выбранного алгоритма.
+            initial_heuristic: Начальное название выбранной эвристики.
+            initial_delay: Начальная задержка анимации в миллисекундах.
         """
         super().__init__(master, bg="#181926", padx=12, pady=10)
 
@@ -63,11 +63,11 @@ class ControlsFrame(tk.Frame):
         btn_font = ("Segoe UI", 9, "bold")
         lbl_fg = "#cad3f5"
 
-        # Row 1: Algorithm & Heuristic Selectors
+        # Строка 1: Выпадающие списки алгоритмов и эвристик, слайдер задержки
         top_row = tk.Frame(self, bg="#181926")
         top_row.pack(fill=tk.X, pady=(0, 6))
 
-        # 1. Algorithm Dropdown
+        # 1. Выбор алгоритма
         tk.Label(top_row, text="Алгоритм:", font=lbl_font, fg=lbl_fg, bg="#181926").pack(side=tk.LEFT, padx=(5, 3))
         self.algo_var = tk.StringVar(value=initial_algorithm)
         algo_options = ["A*", "Дейкстра (Dijkstra)", "BFS (Поиск в ширину)", "Жадный (Greedy Best-First)"]
@@ -81,7 +81,7 @@ class ControlsFrame(tk.Frame):
         self.algo_menu.pack(side=tk.LEFT, padx=5)
         self.algo_menu.bind("<<ComboboxSelected>>", self._handle_algo_change)
 
-        # 2. Heuristic Dropdown
+        # 2. Выбор эвристики расстояния
         tk.Label(top_row, text="Эвристика:", font=lbl_font, fg=lbl_fg, bg="#181926").pack(side=tk.LEFT, padx=(15, 3))
         self.heur_var = tk.StringVar(value=initial_heuristic)
         heur_options = ["Манхэттен", "Евклид", "Чебышев"]
@@ -95,7 +95,7 @@ class ControlsFrame(tk.Frame):
         self.heur_menu.pack(side=tk.LEFT, padx=5)
         self.heur_menu.bind("<<ComboboxSelected>>", self._handle_heur_change)
 
-        # 3. Speed / Delay Slider
+        # 3. Слайдер задержки анимации
         tk.Label(top_row, text="Задержка (мс):", font=lbl_font, fg=lbl_fg, bg="#181926").pack(side=tk.LEFT, padx=(15, 3))
         self.delay_slider = tk.Scale(
             top_row,
@@ -112,7 +112,7 @@ class ControlsFrame(tk.Frame):
         self.delay_slider.set(initial_delay)
         self.delay_slider.pack(side=tk.LEFT, padx=5)
 
-        # Row 2: Action Buttons
+        # Строка 2: Кнопки действий
         bot_row = tk.Frame(self, bg="#181926")
         bot_row.pack(fill=tk.X)
 
@@ -176,7 +176,7 @@ class ControlsFrame(tk.Frame):
         )
         self.btn_clear.pack(side=tk.LEFT, padx=4)
 
-        # Maze and Map I/O tools on right
+        # Инструменты лабиринта и файлов справа
         self.btn_export = tk.Button(
             bot_row,
             text="💾 Экспорт",
@@ -238,20 +238,20 @@ class ControlsFrame(tk.Frame):
         self.btn_random.pack(side=tk.RIGHT, padx=4)
 
     def _handle_algo_change(self, event: tk.Event) -> None:
-        """Handle algorithm selection change."""
+        """Обработка смены выбранного алгоритма."""
         self.on_algorithm_change(self.algo_var.get())
 
     def _handle_heur_change(self, event: tk.Event) -> None:
-        """Handle heuristic selection change."""
+        """Обработка смены выбранной эвристики."""
         self.on_heuristic_change(self.heur_var.get())
 
     def _handle_start_click(self) -> None:
-        """Handle start/pause toggle click."""
+        """Обработка нажатия кнопки Старт/Пауза."""
         is_running = self.on_start_toggle()
         self.set_running_state(is_running)
 
     def set_running_state(self, is_running: bool) -> None:
-        """Update start button label and color depending on running state."""
+        """Обновление надписи и цвета кнопки старта в зависимости от состояния выполнения."""
         if is_running:
             self.btn_start.config(text="⏸ Пауза (Space)", bg="#f5a97f", fg="#181926")
         else:

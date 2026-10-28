@@ -1,4 +1,4 @@
-"""Main application controller integrating grid, pathfinders, canvas renderer, and UI controls."""
+"""Главный контроллер приложения, объединяющий модель сетки, алгоритмы поиска, рендерер и элементы управления."""
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -18,13 +18,13 @@ from src.widgets.controls import ControlsFrame
 
 
 class PathfindingApp:
-    """Coordinates grid model, pathfinding algorithms, rendering, and interactive user input."""
+    """Координирует модель сетки, алгоритмы поиска пути, визуализацию и интерактивный ввод пользователя."""
 
     def __init__(self, root: tk.Tk) -> None:
-        """Initialize main application window, subsystems, and event bindings.
+        """Инициализация главного окна приложения, подсистем и привязок событий.
 
-        Args:
-            root: Root Tkinter window instance.
+        Аргументы:
+            root: Экземпляр корневого окна Tkinter.
         """
         self.root = root
         self.root.title("Алгоритм A* и поиск пути на сетке — Лабораторная работа 3.2 (Шакиров А. С.)")
@@ -37,16 +37,16 @@ class PathfindingApp:
         self.delay_ms = 15
         self.is_running = False
 
-        # 1. Initialize Grid Model (25 rows by 41 cols)
+        # 1. Инициализация модели сетки (25 строк на 41 столбец)
         self.grid = Grid(rows=25, cols=41)
 
-        # 2. Initialize Pathfinder
+        # 2. Инициализация алгоритма поиска по умолчанию (A*)
         self.current_algo_name = "A*"
         self.current_heuristic = HeuristicType.MANHATTAN
         self.finder: BasePathfinder = AStarFinder(self.grid, self.current_heuristic)
         self.status_text = "Готов к запуску"
 
-        # 3. Canvas for Grid Visualization
+        # 3. Холст для визуализации сетки
         self.canvas = tk.Canvas(
             self.root,
             bg="#181926",
@@ -55,7 +55,7 @@ class PathfindingApp:
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.renderer = GridRenderer(self.canvas)
 
-        # 4. Bottom Controls Panel
+        # 4. Нижняя панель управления
         self.controls = ControlsFrame(
             master=self.root,
             on_start_toggle=self.on_start_toggle,
@@ -75,7 +75,7 @@ class PathfindingApp:
         )
         self.controls.pack(fill=tk.X, side=tk.BOTTOM)
 
-        # 5. Bind mouse and keyboard events
+        # 5. Привязка событий мыши и клавиатуры
         self.canvas.bind("<Configure>", self.on_resize)
         self.canvas.bind("<Button-1>", self.on_mouse_down_left)
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag_left)
@@ -90,17 +90,17 @@ class PathfindingApp:
         self.root.bind("<c>", lambda e: self.on_clear_all())
         self.root.bind("<C>", lambda e: self.on_clear_all())
 
-        # Initial render
+        # Первоначальная отрисовка
         self.root.after(50, self.draw)
 
     def on_resize(self, event: tk.Event) -> None:
-        """Handle canvas resize."""
+        """Обработка изменения размера холста."""
         self.width = max(100, event.width)
         self.height = max(100, event.height)
         self.draw()
 
     def draw(self) -> None:
-        """Render current grid state and metrics."""
+        """Отрисовка текущего состояния сетки, маршрута и телеметрии."""
         self.renderer.render(
             grid=self.grid,
             algorithm_name=self.current_algo_name,
@@ -112,7 +112,7 @@ class PathfindingApp:
         )
 
     def _create_finder(self) -> BasePathfinder:
-        """Instantiate selected pathfinding algorithm."""
+        """Создание экземпляра выбранного пользователем алгоритма поиска."""
         if "Дейкстра" in self.current_algo_name:
             return DijkstraFinder(self.grid)
         elif "BFS" in self.current_algo_name:
@@ -123,7 +123,7 @@ class PathfindingApp:
             return AStarFinder(self.grid, self.current_heuristic)
 
     def on_algorithm_change(self, algo_name: str) -> None:
-        """Handle algorithm selection change."""
+        """Обработка переключения алгоритма поиска."""
         self.stop_search()
         self.current_algo_name = algo_name
         self.finder = self._create_finder()
@@ -131,7 +131,7 @@ class PathfindingApp:
         self.draw()
 
     def on_heuristic_change(self, heur_name: str) -> None:
-        """Handle heuristic distance metric change."""
+        """Обработка смены эвристики расстояния."""
         self.stop_search()
         if heur_name == "Евклид":
             self.current_heuristic = HeuristicType.EUCLIDEAN
@@ -145,11 +145,11 @@ class PathfindingApp:
         self.draw()
 
     def on_delay_change(self, new_delay: int) -> None:
-        """Handle animation speed adjustment."""
+        """Обработка изменения скорости анимации со слайдера."""
         self.delay_ms = new_delay
 
     def on_start_toggle(self) -> bool:
-        """Toggle animation continuous search execution."""
+        """Переключение непрерывного выполнения анимации поиска пути."""
         if self.is_running:
             self.stop_search()
         else:
@@ -162,12 +162,12 @@ class PathfindingApp:
         return self.is_running
 
     def stop_search(self) -> None:
-        """Halt continuous animation loop."""
+        """Остановка непрерывного цикла анимации."""
         self.is_running = False
         self.controls.set_running_state(False)
 
     def on_step(self) -> None:
-        """Perform a single step of the pathfinding algorithm."""
+        """Выполнение одного дискретного шага алгоритма поиска пути."""
         self.stop_search()
         if self.finder.is_finished:
             self.finder.reset()
@@ -183,7 +183,7 @@ class PathfindingApp:
         self.draw()
 
     def _search_tick(self) -> None:
-        """Single tick in continuous search animation loop."""
+        """Один такт непрерывного цикла анимации поиска."""
         if not self.is_running:
             return
 
@@ -201,14 +201,14 @@ class PathfindingApp:
             self.draw()
 
     def on_reset_search(self) -> None:
-        """Clear search trails and reset pathfinder."""
+        """Сброс исследованных узлов и найденного пути."""
         self.stop_search()
         self.finder.reset()
         self.status_text = "Путь сброшен"
         self.draw()
 
     def on_clear_all(self) -> None:
-        """Clear all walls and search results."""
+        """Очистка всех стен и результатов поиска."""
         self.stop_search()
         self.grid.clear_walls()
         self.finder.reset()
@@ -216,7 +216,7 @@ class PathfindingApp:
         self.draw()
 
     def on_generate_maze(self) -> None:
-        """Generate labyrinth using recursive backtracker."""
+        """Генерация лабиринта алгоритмом Recursive Backtracker."""
         self.stop_search()
         self.grid.generate_maze()
         self.finder = self._create_finder()
@@ -224,7 +224,7 @@ class PathfindingApp:
         self.draw()
 
     def on_generate_random(self) -> None:
-        """Generate random obstacle walls."""
+        """Генерация случайных стен-препятствий."""
         self.stop_search()
         self.grid.generate_random_walls(density=0.25)
         self.finder = self._create_finder()
@@ -232,14 +232,14 @@ class PathfindingApp:
         self.draw()
 
     def on_mouse_down_left(self, event: tk.Event) -> None:
-        """Handle left mouse click."""
+        """Обработка клика левой кнопкой мыши."""
         cell = self.renderer.screen_to_cell(event.x, event.y, self.grid)
         if not cell:
             return
         row, col = cell
 
-        # Shift + Left click moves Start node
-        if event.state & 0x0001:  # Shift mask
+        # Shift + Левый клик — перемещение точки старта
+        if event.state & 0x0001:  # Маска клавиши Shift
             self.grid.set_start(row, col)
             self.on_reset_search()
         else:
@@ -247,7 +247,7 @@ class PathfindingApp:
             self.draw()
 
     def on_mouse_drag_left(self, event: tk.Event) -> None:
-        """Handle left mouse drag (paint walls)."""
+        """Обработка рисования стен при зажатой левой кнопке мыши."""
         cell = self.renderer.screen_to_cell(event.x, event.y, self.grid)
         if cell and not (event.state & 0x0001):
             row, col = cell
@@ -255,14 +255,14 @@ class PathfindingApp:
             self.draw()
 
     def on_mouse_down_right(self, event: tk.Event) -> None:
-        """Handle right mouse click."""
+        """Обработка клика правой кнопкой мыши."""
         cell = self.renderer.screen_to_cell(event.x, event.y, self.grid)
         if not cell:
             return
         row, col = cell
 
-        # Shift + Right click moves Goal node
-        if event.state & 0x0001:  # Shift mask
+        # Shift + Правый клик — перемещение целевой точки
+        if event.state & 0x0001:  # Маска клавиши Shift
             self.grid.set_goal(row, col)
             self.on_reset_search()
         else:
@@ -270,7 +270,7 @@ class PathfindingApp:
             self.draw()
 
     def on_mouse_drag_right(self, event: tk.Event) -> None:
-        """Handle right mouse drag (erase walls)."""
+        """Обработка стирания стен при зажатой правой кнопке мыши."""
         cell = self.renderer.screen_to_cell(event.x, event.y, self.grid)
         if cell and not (event.state & 0x0001):
             row, col = cell
@@ -278,7 +278,7 @@ class PathfindingApp:
             self.draw()
 
     def on_export_map(self) -> None:
-        """Export current map to a file."""
+        """Экспорт текущей карты в файл."""
         filepath = filedialog.asksaveasfilename(
             title="Экспорт карты лабиринта",
             defaultextension=".txt",
@@ -292,7 +292,7 @@ class PathfindingApp:
         self.draw()
 
     def on_import_map(self) -> None:
-        """Import map from a text file."""
+        """Импорт карты из текстового файла."""
         filepath = filedialog.askopenfilename(
             title="Импорт карты лабиринта",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
@@ -306,5 +306,5 @@ class PathfindingApp:
         self.draw()
 
     def run(self) -> None:
-        """Start application mainloop."""
+        """Запуск главного цикла приложения Tkinter."""
         self.root.mainloop()

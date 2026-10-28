@@ -1,17 +1,17 @@
-"""Canvas renderer for drawing 3D stars, warp trails, and telemetry HUD."""
+"""Рендерер холста для отрисовки 3D-звезд, световых шлейфов и телеметрии HUD."""
 
 import tkinter as tk
 from typing import List, Tuple
 
 
 class StarRenderer:
-    """Renders graphical primitives on Tkinter Canvas."""
+    """Отрисовывает графические примитивы на Tkinter Canvas."""
 
     def __init__(self, canvas: tk.Canvas) -> None:
-        """Initialize renderer with target canvas.
+        """Инициализация рендерера целевым холстом.
 
-        Args:
-            canvas: Tkinter Canvas widget used for drawing.
+        Аргументы:
+            canvas: Экземпляр виджета Tkinter Canvas, используемый для отрисовки.
         """
         self.canvas = canvas
 
@@ -25,27 +25,27 @@ class StarRenderer:
         star_count: int,
         is_paused: bool
     ) -> None:
-        """Draw all stars, trails, and HUD telemetry on the canvas.
+        """Отрисовка всех звезд, шлейфов гиперпрыжка и телеметрии на холсте.
 
-        Args:
-            render_data: List of tuples (curr_x, curr_y, radius, prev_x, prev_y, color).
-            warp_trails: Flag indicating whether to draw warp speed light lines.
-            width: Viewport width.
-            height: Viewport height.
-            speed: Current flight speed.
-            star_count: Active number of stars.
-            is_paused: Pause state flag.
+        Аргументы:
+            render_data: Список кортежей (curr_x, curr_y, radius, prev_x, prev_y, color).
+            warp_trails: Флаг отображения световых шлейфов гиперпрыжка.
+            width: Ширина области просмотра.
+            height: Высота области просмотра.
+            speed: Текущая скорость полета.
+            star_count: Число активных звезд.
+            is_paused: Флаг состояния паузы.
         """
-        # Clear canvas before frame drawing
+        # Очистка холста перед отрисовкой текущего кадра
         self.canvas.delete("all")
 
-        # 1. Render stars and warp trails
+        # 1. Отрисовка звезд и световых шлейфов
         for sx, sy, radius, px, py, color in render_data:
-            # Skip stars fully off screen to optimize rendering
+            # Пропуск звезд, находящихся далеко за пределами экрана, для оптимизации FPS
             if sx < -50 or sx > width + 50 or sy < -50 or sy > height + 50:
                 continue
 
-            # Draw warp light trail connecting previous and current projected points
+            # Отрисовка светового шлейфа от предыдущей к текущей позиции
             if warp_trails and speed > 1.0:
                 trail_width = max(1, int(radius * 0.7))
                 self.canvas.create_line(
@@ -55,7 +55,7 @@ class StarRenderer:
                     capstyle=tk.ROUND
                 )
 
-            # Draw star sphere / disk
+            # Отрисовка диска звезды
             r = max(1.0, radius)
             self.canvas.create_oval(
                 sx - r, sy - r,
@@ -64,7 +64,7 @@ class StarRenderer:
                 outline=""
             )
 
-        # 2. Render Telemetry HUD in top-left corner
+        # 2. Отрисовка информационной панели телеметрии в верхнем левом углу
         hud_lines = [
             f"Звезд: {star_count}",
             f"Скорость: {speed:.1f} ly/s",
@@ -72,7 +72,6 @@ class StarRenderer:
             f"Статус: {'ПАУЗА' if is_paused else 'ПОЛЕТ'}"
         ]
 
-        # Semi-transparent HUD background tag
         y_pos = 20
         for text in hud_lines:
             self.canvas.create_text(

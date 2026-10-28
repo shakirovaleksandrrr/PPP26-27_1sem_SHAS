@@ -1,4 +1,4 @@
-"""Models package for grid representation, graph nodes, and algorithms."""
+"""Пакет моделей для представления сетки, узлов графа и алгоритмов поиска пути."""
 
 from src.models.node import Node, NodeType
 from src.models.grid import Grid

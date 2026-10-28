@@ -1,4 +1,4 @@
-"""Starfield mathematical model managing star coordinates, motion, and projection."""
+"""Математическая модель звездного поля, управляющая координатами, физикой и проекцией."""
 
 import random
 from typing import List, Tuple
@@ -6,7 +6,7 @@ from src.models.star import Star
 
 
 class StarfieldModel:
-    """Mathematical and physical model for 3D starfield simulation."""
+    """Математическая и физическая модель для 3D-симуляции звездного поля."""
 
     def __init__(
         self,
@@ -15,13 +15,13 @@ class StarfieldModel:
         fov_distance: float = 400.0,
         initial_speed: float = 12.0
     ) -> None:
-        """Initialize simulation parameters and populate star collection.
+        """Инициализация параметров симуляции и создание коллекции звезд.
 
-        Args:
-            num_stars: Initial number of active stars.
-            max_z: Maximum depth plane in coordinate space.
-            fov_distance: Camera focal length for perspective projection.
-            initial_speed: Initial flight speed along Z axis.
+        Аргументы:
+            num_stars: Начальное количество активных звезд.
+            max_z: Максимальная плоскость глубины в пространстве координат.
+            fov_distance: Фокусное расстояние камеры для перспективной проекции.
+            initial_speed: Начальная скорость полета вдоль оси Z.
         """
         self.max_z = max_z
         self.fov_distance = fov_distance
@@ -29,26 +29,26 @@ class StarfieldModel:
         self.is_paused = False
         self.warp_trails = True
 
-        # Vanishing point offset (controlled by mouse)
+        # Смещение точки схода (управляется курсором мыши)
         self.offset_x = 0.0
         self.offset_y = 0.0
         self.target_offset_x = 0.0
         self.target_offset_y = 0.0
 
-        # Star collection
+        # Коллекция звезд
         self.stars: List[Star] = []
         self.set_num_stars(num_stars)
 
     def set_num_stars(self, count: int) -> None:
-        """Set the active number of stars, generating or truncating as needed.
+        """Установка активного числа звезд (генерация новых или усечение списка).
 
-        Args:
-            count: Desired total number of stars.
+        Аргументы:
+            count: Требуемое общее количество звезд.
         """
         count = max(10, count)
         current = len(self.stars)
         if count > current:
-            # Add new stars distributed randomly across full volume
+            # Добавление новых звезд, равномерно распределенных по всему объему
             for _ in range(count - current):
                 x = random.uniform(-1000.0, 1000.0)
                 y = random.uniform(-800.0, 800.0)
@@ -58,7 +58,7 @@ class StarfieldModel:
             self.stars = self.stars[:count]
 
     def reset(self) -> None:
-        """Reset all stars to random spatial positions and clear steering offsets."""
+        """Сброс всех звезд на случайные позиции и обнуление смещения камеры."""
         self.offset_x = 0.0
         self.offset_y = 0.0
         self.target_offset_x = 0.0
@@ -70,48 +70,48 @@ class StarfieldModel:
             star.prev_z = star.z
 
     def toggle_pause(self) -> bool:
-        """Toggle simulation pause state.
+        """Переключение состояния паузы симуляции.
 
-        Returns:
-            Current pause state after toggle.
+        Возвращает:
+            Текущее состояние паузы после переключения.
         """
         self.is_paused = not self.is_paused
         return self.is_paused
 
     def set_speed(self, new_speed: float) -> None:
-        """Set flight velocity.
+        """Установка скорости полета.
 
-        Args:
-            new_speed: New speed value (clamped between 0 and 60).
+        Аргументы:
+            new_speed: Новое значение скорости (ограничено диапазоном от 0 до 60).
         """
         self.speed = max(0.0, min(60.0, new_speed))
 
     def update_steering(self, mouse_x: float, mouse_y: float, width: float, height: float) -> None:
-        """Update target vanishing point offset based on mouse position.
+        """Обновление целевого смещения точки схода на основе положения мыши.
 
-        Args:
-            mouse_x: Current mouse X coordinate.
-            mouse_y: Current mouse Y coordinate.
-            width: Viewport width.
-            height: Viewport height.
+        Аргументы:
+            mouse_x: Текущая координата мыши X.
+            mouse_y: Текущая координата мыши Y.
+            width: Ширина области просмотра.
+            height: Высота области просмотра.
         """
-        # Calculate offset from screen center, scaled to gentle steering
+        # Расчет нормализованного смещения от центра экрана для плавного маневрирования
         norm_x = (mouse_x - width / 2.0) / (width / 2.0)
         norm_y = (mouse_y - height / 2.0) / (height / 2.0)
         self.target_offset_x = -norm_x * 120.0
         self.target_offset_y = -norm_y * 90.0
 
     def update(self, width: float, height: float) -> None:
-        """Advance simulation state by one frame.
+        """Продвижение состояния симуляции на один анимационный кадр.
 
-        Args:
-            width: Current viewport width.
-            height: Current viewport height.
+        Аргументы:
+            width: Текущая ширина области просмотра.
+            height: Текущая высота области просмотра.
         """
         if self.is_paused:
             return
 
-        # Smooth interpolation (lerp) toward target steering offset
+        # Плавная интерполяция (lerp) к целевому смещению камеры
         self.offset_x += (self.target_offset_x - self.offset_x) * 0.1
         self.offset_y += (self.target_offset_y - self.offset_y) * 0.1
 
@@ -124,7 +124,7 @@ class StarfieldModel:
         for star in self.stars:
             star.update(self.speed, spread_x, spread_y)
 
-            # Check if projected star is way outside visible viewport and respawn
+            # Проверка выхода спроецированной звезды далеко за границы экрана и респавн
             sx, sy, _, _, _ = star.get_projection(center_x, center_y, self.fov_distance)
             margin = 150.0
             if (sx < -margin or sx > width + margin or
@@ -136,14 +136,14 @@ class StarfieldModel:
         width: float,
         height: float
     ) -> List[Tuple[float, float, float, float, float, str]]:
-        """Compute projected rendering data for all active stars.
+        """Вычисление спроецированных геометрических данных для отрисовки всех звезд.
 
-        Args:
-            width: Current viewport width.
-            height: Current viewport height.
+        Аргументы:
+            width: Текущая ширина экрана.
+            height: Текущая высота экрана.
 
-        Returns:
-            List of tuples (curr_x, curr_y, radius, prev_x, prev_y, color).
+        Возвращает:
+            Список кортежей (curr_x, curr_y, radius, prev_x, prev_y, color).
         """
         center_x = width / 2.0 + self.offset_x
         center_y = height / 2.0 + self.offset_y
